@@ -1,31 +1,166 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8 d17.14
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Source_Code_Car_Parking_Management", "Source_Code_Car_Parking_Management\Source_Code_Car_Parking_Management.vcxproj", "{33100BF4-E98E-435D-9632-50DD01190C89}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Debug|x64.ActiveCfg = Debug|x64
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Debug|x64.Build.0 = Debug|x64
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Debug|x86.ActiveCfg = Debug|Win32
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Debug|x86.Build.0 = Debug|Win32
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Release|x64.ActiveCfg = Release|x64
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Release|x64.Build.0 = Release|x64
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Release|x86.ActiveCfg = Release|Win32
-		{33100BF4-E98E-435D-9632-50DD01190C89}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D9B5B077-D940-4260-8A46-00C7C2D79E10}
-	EndGlobalSection
-EndGlobal
+﻿#include <iostream>
+#include <iomanip>
+using namespace std;
+
+// Function prototypes
+double calculateFee(int totalMinutes, int vehicleType);
+string vehicleName(int type);
+
+int main()
+{
+    const int MAX = 5; // Maximum vehicles
+    string plate[MAX];
+    int type[MAX];
+    int duration[MAX];
+    double fee[MAX];
+    int count = 0;
+    int choice;
+
+    do {
+        cout << "\n=========================================\n";
+        cout << "      CAR PARKING MANAGEMENT SYSTEM\n";
+        cout << "=========================================\n";
+        cout << "1. Calculate Parking Fee\n";
+        cout << "2. View All Records\n";
+        cout << "3. End\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        // ---------------- OPTION 1 ----------------
+        if (choice == 1) {
+            if (count >= MAX) {
+                cout << "Maximum vehicle limit reached!\n";
+                continue;
+            }
+
+            int eh, em, xh, xm;
+
+            cout << "\nEnter plate number: ";
+            cin >> plate[count];
+
+            cout << "Vehicle type (1-Car, 2-Motorcycle): ";
+            cin >> type[count];
+
+            if (type[count] != 1 && type[count] != 2) {
+                cout << "Invalid vehicle type!\n";
+                continue;
+            }
+
+            cout << "Enter entry time (hour minute) in 24-hour format: ";
+            cin >> eh >> em;
+
+            cout << "Enter exit time (hour minute) in 24-hour format: ";
+            cin >> xh >> xm;
+
+            // Time validation
+            if (eh < 0 || eh > 23 || em < 0 || em > 59 ||
+                xh < 0 || xh > 23 || xm < 0 || xm > 59) {
+                cout << "Invalid time format!\n";
+                continue;
+            }
+
+            int entry = eh * 60 + em;
+            int exitTime = xh * 60 + xm;
+
+            if (exitTime < entry) {
+                cout << "Error: Exit time cannot be before entry time!\n";
+                continue;
+            }
+
+            duration[count] = exitTime - entry;
+            fee[count] = calculateFee(duration[count], type[count]);
+
+            // ----------- DISPLAY RESULT -----------
+            cout << "\n-----------------------------------------\n";
+            cout << "Plate Number      : " << plate[count] << endl;
+            cout << "Vehicle Type      : " << vehicleName(type[count]) << endl;
+            cout << "Entry Time        : " << setw(2) << setfill('0') << eh << ":"
+                << setw(2) << setfill('0') << em << endl;
+            cout << "Exit Time         : " << setw(2) << setfill('0') << xh << ":"
+                << setw(2) << setfill('0') << xm << endl;
+
+            cout << "\nTotal Parking Time: "
+                << duration[count] / 60 << " hours "
+                << duration[count] % 60 << " minutes\n";
+
+            if (type[count] == 1) {
+                cout << "Parking Rate      : RM 2.00 (1st hour)\n";
+                cout << "Additional Charge : RM 1.50 per hour\n";
+            }
+            else {
+                cout << "Parking Rate      : RM 1.00 (1st hour)\n";
+                cout << "Additional Charge : RM 1.00 per hour\n";
+            }
+
+            cout << "-----------------------------------------\n";
+            cout << "TOTAL PARKING FEE : RM " << fixed << setprecision(2)
+                << fee[count] << endl;
+            cout << "=========================================\n";
+            cout << "Thank you for using our system!\n";
+
+            count++;
+        }
+
+        // ---------------- OPTION 2 ----------------
+        else if (choice == 2) {
+            if (count == 0) {
+                cout << "No parking records available.\n";
+            }
+            else {
+                cout << "\n============ PARKING RECORDS ============\n";
+
+                // RESET setfill
+                cout << setfill(' ');
+
+                cout << left
+                    << setw(15) << "Plate"
+                    << setw(15) << "Vehicle"
+                    << setw(18) << "Duration"
+                    << "Fee\n";
+
+                cout << "-----------------------------------------\n";
+
+                for (int i = 0; i < count; i++) {
+                    cout << left
+                        << setw(15) << plate[i]
+                        << setw(15) << vehicleName(type[i])
+                        << setw(8) << duration[i] << " mins   "
+                        << "RM " << fixed << setprecision(2)
+                        << fee[i] << endl;
+                }
+            }
+        }
+
+
+        // ---------------- INVALID ----------------
+        else if (choice != 3) {
+            cout << "Invalid choice! Please try again.\n";
+        }
+
+    } while (choice != 3);
+
+    cout << "\nExiting system... Goodbye!\n";
+    return 0;
+}
+
+// ---------------- FUNCTIONS ----------------
+double calculateFee(int totalMinutes, int vehicleType)
+{
+    double fee;
+    if (vehicleType == 1) { // Car
+        fee = 2.00;
+        if (totalMinutes > 60)
+            fee += ((totalMinutes - 1) / 60) * 1.50;
+    }
+    else { // Motorcycle
+        fee = 1.00;
+        if (totalMinutes > 60)
+            fee += ((totalMinutes - 1) / 60) * 1.00;
+    }
+    return fee;
+}
+
+string vehicleName(int type)
+{
+    return (type == 1) ? "Car" : "Motorcycle";
+}
